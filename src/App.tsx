@@ -15,30 +15,30 @@ export const goodsFromServer: string[] = [
   'Garlic',
 ];
 
-type SortType = 'alphabet' | 'length' | null;
+enum SortType {
+  Default = 'default',
+  Alphabet = 'alphabet',
+  Length = 'length',
+}
 
-// ОДНА функція з switch-case
+// одна функція
 function getUserSort(sortType: SortType, isReversed: boolean): string[] {
   const result = [...goodsFromServer];
 
   switch (sortType) {
-    case 'alphabet':
-      // стандартно: A → Z
+    case SortType.Alphabet:
       result.sort((a, b) => a.localeCompare(b));
       break;
 
-    case 'length':
-      // найкоротші → найдовші
+    case SortType.Length:
       result.sort((a, b) => a.length - b.length);
       break;
 
-    case null:
+    case SortType.Default:
     default:
-      // початковий порядок
       break;
   }
 
-  // Reverse можна поєднати з будь-яким сортуванням або без нього
   if (isReversed) {
     result.reverse();
   }
@@ -47,28 +47,11 @@ function getUserSort(sortType: SortType, isReversed: boolean): string[] {
 }
 
 export const App: React.FC = () => {
-  const [sortType, setSortType] = useState<SortType>(null);
+  const [sortType, setSortType] = useState<SortType>(SortType.Default);
   const [isReversed, setIsReversed] = useState(false);
 
   const goods = getUserSort(sortType, isReversed);
-  const isFiltered = sortType !== null || isReversed;
-
-  const handleAlphabet = () => {
-    setSortType('alphabet');
-  };
-
-  const handleLength = () => {
-    setSortType('length');
-  };
-
-  const handleReverse = () => {
-    setIsReversed(prev => !prev);
-  };
-
-  const handleReset = () => {
-    setSortType(null);
-    setIsReversed(false);
-  };
+  const isFiltered = sortType !== SortType.Default || isReversed;
 
   return (
     <div className="section content">
@@ -76,9 +59,9 @@ export const App: React.FC = () => {
         <button
           type="button"
           className={`button is-info ${
-            sortType === 'alphabet' ? '' : 'is-light'
+            sortType === SortType.Alphabet ? '' : 'is-light'
           }`}
-          onClick={handleAlphabet}
+          onClick={() => setSortType(SortType.Alphabet)}
         >
           Sort alphabetically
         </button>
@@ -86,9 +69,9 @@ export const App: React.FC = () => {
         <button
           type="button"
           className={`button is-success ${
-            sortType === 'length' ? '' : 'is-light'
+            sortType === SortType.Length ? '' : 'is-light'
           }`}
-          onClick={handleLength}
+          onClick={() => setSortType(SortType.Length)}
         >
           Sort by length
         </button>
@@ -96,7 +79,7 @@ export const App: React.FC = () => {
         <button
           type="button"
           className={`button is-warning ${isReversed ? '' : 'is-light'}`}
-          onClick={handleReverse}
+          onClick={() => setIsReversed(prev => !prev)}
         >
           Reverse
         </button>
@@ -105,7 +88,10 @@ export const App: React.FC = () => {
           <button
             type="button"
             className="button is-danger is-light"
-            onClick={handleReset}
+            onClick={() => {
+              setSortType(SortType.Default);
+              setIsReversed(false);
+            }}
           >
             Reset
           </button>
